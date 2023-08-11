@@ -29,3 +29,19 @@ Citizen.CreateThread(function()
         TriggerClientEvent('maku_pedmenu:sync', playerId, ped)
     end
 end)
+
+RegisterNetEvent('esx:onPlayerSpawn', function()
+    local source = source
+    local player = ESX.GetPlayerFromId(source)
+    if player == nil then
+        print('^1[error]^0 player ', source, 'can not be synced (2)')
+        return
+    end
+
+    local ped = db.getPlayerPed(player.identifier)
+    if ped == nil then
+        return
+    end
+    ped.identifier = nil
+    TriggerClientEvent('maku_pedmenu:sync', source, ped)
+end)

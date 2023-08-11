@@ -1,3 +1,6 @@
+local cachedPed = nil
+local cachedComponents = nil
+
 local function loadPed(model)
     if type(model) ~= "number" then
         model = GetHashKey(model)
@@ -30,14 +33,6 @@ local function loadVisualization(components)
     end
 end
 
-RegisterCommand('loadmodel', function(source, args, raw)
-    local model = args[1]
-    if not model then
-        return
-    end
-    loadPed(model)
-end)
-
 RegisterNetEvent('maku_pedmenu:sync', function(ped)
     local playerPed = PlayerPedId()
     if ped == nil then
@@ -46,14 +41,29 @@ RegisterNetEvent('maku_pedmenu:sync', function(ped)
         return
     end
     local model = ped.model
+    local components = ped.components
+
+    cachedPed = model
+    cachedComponents = ped.components
+
     if GetEntityModel(playerPed) ~= GetHashKey(model) then
         print('^3[sync]^0 player has different ped, loading correct ped')
-        local success = loadPed(ped.model)
+        local success = loadPed(model)
         if not success then
             print('^1[sync]^0 failed to load ped')
             return
         end
     end
     print('^3[sync]^0 loading visualization')
-    loadVisualization(ped.components)
+    loadVisualization(components)
+end)
+
+RegisterCommand('refresh', function(source, args, raw)
+    local success = loadPed(cachedPed)
+    if not success then
+        print('^1[sync]^0 failed to load ped')
+        return
+    end
+    print('^3[sync]^0 loading visualization')
+    loadVisualization(cachedComponents)
 end)
